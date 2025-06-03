@@ -1,36 +1,36 @@
 #include "editDistanceMemo.h"
 #include "editDistanceRecursive.h"
+#include "editDistanceDP.h"
+#include "editDistanceDPOptimized.h"
 #include <iostream>
+#include <unordered_map>
+#include <functional>
 
 // g++ .\main.cpp .\editDistanceMemo.cpp .\editDistanceRecursive.cpp -o main
 int main(){
-    bool usarMemoization = false;
-    if (usarMemoization){
-        std::cout << "Distancia gato y perro: " << (editDistanceRecursive("gato","perro",4,5)) << std::endl;
-        std::cout << "Distancia gato y gallina: " << (editDistanceRecursive("gato","gallina",4,7)) << std::endl;;
-        std::cout << "Distancia gato y patito: " << (editDistanceRecursive("gato","patito",4,6)) << std::endl;;
-        std::cout << "Distancia perro y gallina: " << (editDistanceRecursive("perro","gallina",5,7)) << std::endl;;
-        std::cout << "Distancia perro y patito: " << (editDistanceRecursive("perro","patito",5,6)) << std::endl;;
-        std::cout << "Distancia gallina y perro: " << (editDistanceRecursive("gallina","patito",7,6)) << std::endl;;
-    } else {
+    std::unordered_map<std::string, std::function<int(std::string, std::string, int, int)>> funciones;
+    funciones["memo"] = [](std::string str1, std::string str2, int m, int n) {
         std::map<std::pair<int, int>, int> memo;
-        std::cout << "Distancia gato y perro: " << (editDistanceMemo("gato","perro",4,5,memo)) << std::endl;
-        memo.clear(); // Limpiar para la siguiente llamada
+        return editDistanceMemo(str1, str2, m, n, memo);
+    };
+    funciones["recursive"] = editDistanceRecursive;
+    funciones["dp"] = [](std::string str1, std::string str2, int m, int n) {
+        return editDistanceDP(str1, str2);
+    };
+    funciones["dpopt"] = [](std::string str1, std::string str2, int m, int n) {
+        return editDistanceDPOptimized(str1, str2);
+    };
 
-        std::cout << "Distancia gato y gallina: " << (editDistanceMemo("gato","gallina",4,7,memo)) << std::endl;
-        memo.clear(); 
+    std::string metodo = "dp";
+    auto editDistance = funciones[metodo];
+    
+    std::cout << "Distancia gato y perro: " << (editDistance("gato","perro",4,5)) << std::endl;
+    std::cout << "Distancia gato y gallina: " << (editDistance("gato","gallina",4,7)) << std::endl;
+    std::cout << "Distancia gato y patito: " << (editDistance("gato","patito",4,6)) << std::endl;
+    std::cout << "Distancia perro y gallina: " << (editDistance("perro","gallina",5,7)) << std::endl;
+    std::cout << "Distancia perro y patito: " << (editDistance("perro","patito",5,6)) << std::endl;
+    std::cout << "Distancia gallina y perro: " << (editDistance("gallina","patito",7,6)) << std::endl;
 
-        std::cout << "Distancia gato y patito: " << (editDistanceMemo("gato","patito",4,6,memo)) << std::endl;
-        memo.clear();
-
-        std::cout << "Distancia perro y gallina: " << (editDistanceMemo("perro","gallina",5,7,memo)) << std::endl;
-        memo.clear(); 
-
-        std::cout << "Distancia perro y patito: " << (editDistanceMemo("perro","patito",5,6,memo)) << std::endl;
-        memo.clear();
-
-        std::cout << "Distancia gallina y patito: " << (editDistanceMemo("gallina","patito",7,6,memo)) << std::endl;
-    }
     return 0;
 }
 
