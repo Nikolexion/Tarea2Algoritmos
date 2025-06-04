@@ -1,6 +1,6 @@
 #include "editDistanceDP.h"
 
-int editDistanceDP(std::string str1, std::string str2){
+int editDistanceDP(const std::string &str1, const std::string &str2){
     int l1 = str1.length();
     int l2 = str2.length();
 

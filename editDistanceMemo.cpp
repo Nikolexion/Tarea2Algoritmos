@@ -1,6 +1,6 @@
 #include "editDistanceMemo.h"
 
-int editDistanceMemo(const std::string str1, const std::string str2, int i, int j, std::map<std::pair<int, int>, int>& memo){
+int editDistanceMemo(const std::string &str1, const std::string &str2, int i, int j, std::map<std::pair<int, int>, int>& memo){
 
     // Caso base cuando uno de los strings está vacio
     if (i == 0) return j; 

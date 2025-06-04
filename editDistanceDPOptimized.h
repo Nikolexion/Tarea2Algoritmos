@@ -4,6 +4,6 @@
 #include <vector>
 #include <algorithm>
 
-int editDistanceDPOptimized(std::string str1, std::string str2);
+int editDistanceDPOptimized(const std::string &str1, const std::string &str2);
 
 #endif

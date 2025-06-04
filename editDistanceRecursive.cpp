@@ -1,6 +1,6 @@
 #include "editDistanceRecursive.h"
 
-int editDistanceRecursive(std::string str1, std::string str2,int i, int j){
+int editDistanceRecursive(const std::string &str1, const std::string &str2,int i, int j){
 
     // Caso base cuando uno de los strings está vacio
     if (i == 0) return j; 

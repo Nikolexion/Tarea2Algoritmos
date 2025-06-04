@@ -1,6 +1,6 @@
 #include "editDistanceDPOptimized.h"
 
-int editDistanceDPOptimized(const std::string str1, const std::string str2){
+int editDistanceDPOptimized(const std::string &str1, const std::string &str2){
     int l1 = str1.length();
     int l2 = str2.length();
 
