@@ -77,8 +77,22 @@ int main(int argc, char *argv[])
     for (auto funcion : funciones) {
         mean_time = 0;
         time_stdev = 0;
-        size_t memoria_usada = 0;
-        std::string str1 = "tralalero", str2 = "tralala";
+
+
+        std::string archivo1 = "archivo3.txt", archivo2 = "archivo4.txt";
+        auto leerArchivo = [](const std::string& nombreArchivo) -> std::string {
+            std::ifstream archivo(nombreArchivo);
+            if (!archivo) {
+                std::cerr << "No se pudo abrir el archivo: " << nombreArchivo << std::endl;
+                exit(-1);
+            }
+            std::stringstream buffer;
+            buffer << archivo.rdbuf();
+            return buffer.str();
+        };
+
+        std::string str1 = leerArchivo(archivo1);
+        std::string str2 = leerArchivo(archivo2);     
 
         // Run to compute elapsed time
         for (i = 0; i < runs; i++) {
@@ -96,7 +110,6 @@ int main(int argc, char *argv[])
         }
 
         // Compute statistics
-        memoria_usada /= runs;
         mean_time /= runs;
 
         for (i = 0; i < runs; i++) {

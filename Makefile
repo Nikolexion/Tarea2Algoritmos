@@ -3,7 +3,7 @@
 # Variables
 CC = g++
 CFLAGS = -O3
-SRC = $(wildcard *.cpp)
+SRC = main.cpp editDistanceDP.cpp editDistanceDPOptimized.cpp editDistanceMemo.cpp editDistanceRecursive.cpp
 OBJ = $(SRC:.cpp=.o)
 TARGET = editDistance
 
