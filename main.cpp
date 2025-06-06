@@ -7,6 +7,8 @@
 #include <functional>
 
 // g++ .\main.cpp .\editDistanceMemo.cpp .\editDistanceRecursive.cpp -o main
+
+/*
 int main(){
     std::unordered_map<std::string, std::function<int(std::string, std::string, int, int)>> funciones;
     funciones["memo"] = [](std::string str1, std::string str2, int m, int n) {
@@ -21,7 +23,7 @@ int main(){
         return editDistanceDPOptimized(str1, str2);
     };
 
-    std::string metodo = "dp";
+    std::string metodo = "dpopt";
     auto editDistance = funciones[metodo];
     
     std::cout << "Distancia gato y perro: " << (editDistance("gato","perro",4,5)) << std::endl;
@@ -34,3 +36,4 @@ int main(){
     return 0;
 }
 
+*/
