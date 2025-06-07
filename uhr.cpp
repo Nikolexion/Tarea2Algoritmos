@@ -122,6 +122,14 @@ int main(int argc, char *argv[])
             // o usar un número menor de 'runs', o un timeout.
             
             std::cout << "Probando algoritmo: " << nombre_algoritmo << std::endl;
+            if (nombre_algoritmo == "recursive") {
+                // Si el algoritmo es recursivo, podrías querer saltarlo para archivos grandes
+                if (str1_content.length() > 500 || str2_content.length() > 500) {
+                    std::cerr << "Saltando algoritmo recursivo para archivos grandes." << std::endl;
+                    continue;
+                }
+
+            }
 
             mean_time = 0;
             time_stdev = 0;
