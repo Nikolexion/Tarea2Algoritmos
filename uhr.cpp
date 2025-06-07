@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
     // File to write time data
     std::ofstream time_data;
     time_data.open(argv[1]);
-    time_data << "n,t_mean,t_stdev,t_Q0,t_Q1,t_Q2,t_Q3,t_Q4" << std::endl;
+    time_data << "n,str1,str2,str1_len,str2_len,t_mean,t_stdev,t_Q0,t_Q1,t_Q2,t_Q3,t_Q4" << std::endl;
 
     // Definimos diccionario para funciones 
     std::unordered_map<std::string, std::function<int(std::string, std::string, int, int)>> funciones;
@@ -73,8 +73,7 @@ int main(int argc, char *argv[])
     std::vector<std::string> nombres_archivos = {"archivo1.txt", "archivo2.txt", "archivo3.txt", "archivo4.txt"};
     std::vector<std::pair<std::string, std::string>> pares_de_archivos;
     for (size_t idx1 = 0; idx1 < nombres_archivos.size(); ++idx1) {
-        for (size_t idx2 = 0; idx2 < nombres_archivos.size(); ++idx2) {
-            if (idx1 == idx2) continue; // No comparar un archivo consigo mismo
+        for (size_t idx2 = idx1 + 1; idx2 < nombres_archivos.size(); ++idx2) {
             pares_de_archivos.push_back({nombres_archivos[idx1], nombres_archivos[idx2]});
         }
     }
@@ -121,17 +120,8 @@ int main(int argc, char *argv[])
 
             // Para la versión recursiva, si es muy lenta con archivos grandes, podrías querer saltarla
             // o usar un número menor de 'runs', o un timeout.
-            if (nombre_algoritmo == "recursive" && (str1_content.length() > 50 || str2_content.length() > 50)) { // Ejemplo de umbral
-                 std::cout << "Saltando 'recursive' para archivos grandes: " << nombre_archivo_s1 << " (" << str1_content.length() << "), "
-                           << nombre_archivo_s2 << " (" << str2_content.length() << ")" << std::endl;
-                 time_data << nombre_algoritmo << "," << nombre_archivo_s1 << "," << nombre_archivo_s2 << ","
-                           << str1_content.length() << "," << str2_content.length()
-                           << ",SKIPPED,SKIPPED,SKIPPED,SKIPPED,SKIPPED,SKIPPED,SKIPPED" << std::endl;
-                 executed_runs += runs; // Sumar los runs que se saltan
-                 display_progress(executed_runs, total_tests_to_run); // Actualizar progreso
-                 continue;
-            }
-
+            
+            std::cout << "Probando algoritmo: " << nombre_algoritmo << std::endl;
 
             mean_time = 0;
             time_stdev = 0;
