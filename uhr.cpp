@@ -70,16 +70,30 @@ int main(int argc, char *argv[])
         return editDistanceDPOptimized(str1, str2);
     };
 
+    std::vector<std::string> nombres_archivos = {"archivo1.txt", "archivo2.txt", "archivo3.txt", "archivo4.txt"};
+    std::vector<std::pair<std::string, std::string>> pares_de_archivos;
+    for (size_t idx1 = 0; idx1 < nombres_archivos.size(); ++idx1) {
+        for (size_t idx2 = 0; idx2 < nombres_archivos.size(); ++idx2) {
+            if (idx1 == idx2) continue; // No comparar un archivo consigo mismo
+            pares_de_archivos.push_back({nombres_archivos[idx1], nombres_archivos[idx2]});
+        }
+    }
+
+    std::int64_t total_tests_to_run = pares_de_archivos.size() * funciones.size() * runs;
 
     // Begin testing
     std::cerr << "\033[0;36mRunning tests...\033[0m" << std::endl << std::endl;
     executed_runs = 0;
-    for (auto funcion : funciones) {
+    for (const auto& par_archivos : pares_de_archivos) {
         mean_time = 0;
         time_stdev = 0;
+        const std::string& nombre_archivo_s1 = par_archivos.first;
+        const std::string& nombre_archivo_s2 = par_archivos.second;
 
+        std::cout << "Probando con S1: " << nombre_archivo_s1 << " y S2: " << nombre_archivo_s2 << std::endl;
 
-        std::string archivo1 = "archivo3.txt", archivo2 = "archivo4.txt";
+        std::string str1_content, str2_content;
+
         auto leerArchivo = [](const std::string& nombreArchivo) -> std::string {
             std::ifstream archivo(nombreArchivo);
             if (!archivo) {
@@ -91,39 +105,72 @@ int main(int argc, char *argv[])
             return buffer.str();
         };
 
-        std::string str1 = leerArchivo(archivo1);
-        std::string str2 = leerArchivo(archivo2);     
-
-        // Run to compute elapsed time
-        for (i = 0; i < runs; i++) {
-            // Remember to change total depending on step type
-            display_progress(++executed_runs, total_runs_additive);
-
-            begin_time = std::chrono::high_resolution_clock::now();
-            funcion.second(str1, str2, str1.size(), str2.size());
-            end_time = std::chrono::high_resolution_clock::now();
-
-            elapsed_time = end_time - begin_time;
-            times[i] = elapsed_time.count();
-
-            mean_time += times[i];
+        try {
+            str1_content = leerArchivo(nombre_archivo_s1);
+            str2_content = leerArchivo(nombre_archivo_s2);
+        } catch (const std::runtime_error& e) {
+            std::cerr << "Error leyendo archivos: " << e.what() << ". Saltando esta combinación." << std::endl;
+            // Ajustar executed_runs si se salta un set completo de 'runs' para 'funciones.size()' algoritmos
+            executed_runs += funciones.size() * runs; // Asumiendo que display_progress lo maneja bien
+            continue;
         }
+        
+        for (const auto& funcion_entry : funciones) {
+            const std::string& nombre_algoritmo = funcion_entry.first;
+            auto algoritmo_a_probar = funcion_entry.second;
 
-        // Compute statistics
-        mean_time /= runs;
+            // Para la versión recursiva, si es muy lenta con archivos grandes, podrías querer saltarla
+            // o usar un número menor de 'runs', o un timeout.
+            if (nombre_algoritmo == "recursive" && (str1_content.length() > 50 || str2_content.length() > 50)) { // Ejemplo de umbral
+                 std::cout << "Saltando 'recursive' para archivos grandes: " << nombre_archivo_s1 << " (" << str1_content.length() << "), "
+                           << nombre_archivo_s2 << " (" << str2_content.length() << ")" << std::endl;
+                 time_data << nombre_algoritmo << "," << nombre_archivo_s1 << "," << nombre_archivo_s2 << ","
+                           << str1_content.length() << "," << str2_content.length()
+                           << ",SKIPPED,SKIPPED,SKIPPED,SKIPPED,SKIPPED,SKIPPED,SKIPPED" << std::endl;
+                 executed_runs += runs; // Sumar los runs que se saltan
+                 display_progress(executed_runs, total_tests_to_run); // Actualizar progreso
+                 continue;
+            }
 
-        for (i = 0; i < runs; i++) {
-            dev = times[i] - mean_time;
-            time_stdev += dev * dev;
+
+            mean_time = 0;
+            time_stdev = 0;
+
+            for (i = 0; i < runs; i++) {
+                display_progress(++executed_runs, total_tests_to_run);
+
+                begin_time = std::chrono::high_resolution_clock::now();
+                /* int result = */ algoritmo_a_probar(str1_content, str2_content, str1_content.length(), str2_content.length());
+                end_time = std::chrono::high_resolution_clock::now();
+
+                elapsed_time = end_time - begin_time;
+                times[i] = elapsed_time.count(); // En nanosegundos
+                mean_time += times[i];
+            }
+
+            // Compute statistics
+            mean_time /= runs;
+
+            if (runs > 1) {
+                for (i = 0; i < runs; i++) {
+                    dev = times[i] - mean_time;
+                    time_stdev += dev * dev;
+                }
+                time_stdev /= (runs - 1); // Subtract 1 to get unbiased estimator
+                time_stdev = std::sqrt(time_stdev);
+            } else {
+                time_stdev = 0; // No hay desviación si solo hay una muestra
+            }
+
+
+            quartiles(times, q); // Asumiendo que q se maneja bien (se limpia o se sobrescribe)
+
+            // Escribir nombre del algoritmo, nombres de archivo y sus tamaños
+            time_data << nombre_algoritmo << "," << nombre_archivo_s1 << "," << nombre_archivo_s2 << ","
+                      << str1_content.length() << "," << str2_content.length() << ","
+                      << mean_time << "," << time_stdev << ",";
+            time_data << q[0] << "," << q[1] << "," << q[2] << "," << q[3] << "," << q[4] << std::endl;
         }
-
-        time_stdev /= runs - 1; // Subtract 1 to get unbiased estimator
-        time_stdev = std::sqrt(time_stdev);
-
-        quartiles(times, q);
-
-        time_data << funcion.first << "," << mean_time << "," << time_stdev << ",";
-        time_data << q[0] << "," << q[1] << "," << q[2] << "," << q[3] << "," << q[4] << std::endl;
     }
 
     // This is to keep loading bar after testing
