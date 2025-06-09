@@ -2,7 +2,7 @@
 
 # Variables
 CC = g++
-CFLAGS = -O3
+CFLAGS = -O0
 SRC = main.cpp editDistanceDP.cpp editDistanceDPOptimized.cpp editDistanceMemo.cpp editDistanceRecursive.cpp
 OBJ = $(SRC:.cpp=.o)
 TARGET = editDistance
